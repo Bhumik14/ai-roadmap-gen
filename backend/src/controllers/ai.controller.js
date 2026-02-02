@@ -1,13 +1,23 @@
 import {fastapiClient} from "../config/fastapi.js"
 
 export async function roadmapCreationController (req, res) {
+    console.log(req.body);
     try{
-        const { target_role, experience, skills, goals, weeklyTime } = req.body;
-        if(!target_role || !experience || skills.length < 1) {
+        const { target_role, skills, goals, duration } = req.body;
+        if(!target_role || !skills || !goals || !duration) {
             return res.status(400).send({error: 'All fields are required'});
         }
+        console.log(req.body);
 
-        const prompt_response = await fastapiClient.post("/api/roadmap/format-prompt", req.body); // output - formated prompt (string)
+        const body = {
+            target_role: req.body.target_role,
+            experience: req.body.experience,
+            skills: req.body.skills,
+            goals: req.body.goals,
+            duration: req.body.duration,
+        }
+        const prompt_response = await fastapiClient.post("/roadmap/format-prompt", body); // output - formated prompt (string)
+        console.log(prompt_response);
         const { formatted_message } = prompt_response.data;
         console.log(formatted_message);
 
@@ -16,8 +26,10 @@ export async function roadmapCreationController (req, res) {
             "human": formatted_message[1].content,
         }
         console.log(prompt);
-        const roadmap = await fastapiClient.post("/api/roadmap/create-roadmap", prompt);
 
+        const roadmap = await fastapiClient.post("/roadmap/create-roadmap", prompt);
+        console.log(roadmap);
+        
          res.status(201).json({
             message: "Roadmap Created Sucessfully",
              roadmap: roadmap.data

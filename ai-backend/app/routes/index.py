@@ -13,7 +13,7 @@ class PromptRequest(BaseModel):
     experience: str
     skills: List[str]
     goals: List[str]
-    weekly_time: str
+    duration: str
 
 class RoadmapRequest(BaseModel):
     system: str
@@ -27,6 +27,7 @@ async def create(request: RoadmapRequest):
     print(f"Roadmap Generated Successfully {roadmap}")
     return roadmap
 
+
 @router.post('/format-prompt')
 async def format_prompt(request: PromptRequest):
     print(request)
@@ -35,7 +36,7 @@ async def format_prompt(request: PromptRequest):
         "experience": request.experience,
         "skills": request.skills,
         "goals": request.goals,
-        "weekly_time": request.weekly_time,
+        "duration": request.duration,
     }
     formatted = await prompt_formatter(body)
     print(f"Prompt Generated Successfully {formatted}")

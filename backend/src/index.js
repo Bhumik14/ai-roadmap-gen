@@ -5,16 +5,19 @@ dotenv.config();
 
 const port = process.env.port || 3000;
 
+
 // Connecting to postgres db(docker container)
 async function start(){
     try{
         await initDB();
+
     }
     catch(e){
         console.error("Failed to init DB:", e);
     }
 }
 start()
+
 app.listen(port, ()=>{
     console.log(`Server started at port ${port}`);
 })
