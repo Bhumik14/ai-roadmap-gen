@@ -1,1 +1,53 @@
 @import "tailwindcss";
+
+@layer base {
+  html {
+    font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial,
+      "Apple Color Emoji", "Segoe UI Emoji";
+  }
+
+  body {
+    @apply bg-slate-50 text-slate-900 antialiased;
+  }
+
+  a {
+    @apply text-slate-900;
+  }
+}
+
+@layer components {
+  .app-container {
+    @apply mx-auto w-full max-w-6xl px-4 sm:px-6;
+  }
+
+  .app-card {
+    @apply rounded-2xl border border-slate-200 bg-white shadow-sm;
+  }
+
+  .app-card-body {
+    @apply p-5 sm:p-6;
+  }
+
+  .app-input {
+    @apply w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm shadow-sm outline-none transition;
+    @apply placeholder:text-slate-400;
+    @apply focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20;
+  }
+
+  .app-button {
+    @apply inline-flex items-center justify-center rounded-xl bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition;
+    @apply hover:bg-blue-700;
+    @apply focus:outline-none focus:ring-2 focus:ring-blue-500/30;
+    @apply disabled:cursor-not-allowed disabled:opacity-60;
+  }
+
+  .app-button-secondary {
+    @apply inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-900 shadow-sm transition;
+    @apply hover:bg-slate-50;
+    @apply focus:outline-none focus:ring-2 focus:ring-blue-500/20;
+  }
+
+  .app-badge {
+    @apply inline-flex items-center gap-1 rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-700;
+  }
+}

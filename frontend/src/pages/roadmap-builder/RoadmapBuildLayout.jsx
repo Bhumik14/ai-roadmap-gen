@@ -2,35 +2,46 @@ import { NavLink, Outlet } from "react-router-dom"
 
 const tabClass = ({ isActive }) =>
     isActive
-        ? "border-b-2 border-blue-600 text-blue-600 font-medium pb-2"
-        : "text-gray-600 hover:text-blue-600 pb-2"
+        ? "border-b-2 border-blue-700 text-blue-700 font-semibold pb-3"
+        : "text-slate-600 hover:text-blue-700 pb-3"
 
 export default function RoadmapBuilderLayout() {
     return (
-        <div className="max-w-5xl mx-auto px-6 py-8">
+        <div className="space-y-6">
 
             {/* Header */}
-            <h1 className="text-2xl font-bold mb-6">
-                Build Your Roadmap
-            </h1>
-
-            {/* Top Options */}
-            <div className="flex gap-8 border-b mb-8">
-                <NavLink to="" end className={tabClass}>
-                    Create with Variables
-                </NavLink>
-
-                <NavLink to="resume" className={tabClass}>
-                    Create with Resume
-                </NavLink>
-
-                <NavLink to="existing" className={tabClass}>
-                    Existing Roadmaps
-                </NavLink>
+            <div>
+                <h1 className="text-3xl font-semibold tracking-tight">
+                    Build Your Roadmap
+                </h1>
+                <p className="mt-1 text-sm text-slate-600">
+                    Choose an input method and generate a personalized study plan.
+                </p>
             </div>
 
-            {/* Dynamic Content */}
-            <Outlet />
+            {/* Top Options */}
+            <div className="app-card">
+                <div className="app-card-body">
+                    <div className="flex flex-wrap gap-x-8 gap-y-3 border-b border-slate-200">
+                        <NavLink to="" end className={tabClass}>
+                            Create with Variables
+                        </NavLink>
+
+                        <NavLink to="resume" className={tabClass}>
+                            Create with Resume
+                        </NavLink>
+
+                        <NavLink to="existing" className={tabClass}>
+                            Existing Roadmaps
+                        </NavLink>
+                    </div>
+
+                    <div className="pt-6">
+                        {/* Dynamic Content */}
+                        <Outlet />
+                    </div>
+                </div>
+            </div>
 
         </div>
     )
