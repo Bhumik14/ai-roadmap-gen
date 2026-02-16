@@ -1,209 +1,253 @@
-import { useState } from "react"
+import { useState } from "react";
+import { api } from "../../lib/api.js";
 
 export default function InteractiveQuiz() {
+  const [topic, setTopic] = useState("");
+  const [purpose, setPurpose] = useState("");
+  const [numQuestions, setNumQuestions] = useState(5);
 
-    // Form State
-    const [topic, setTopic] = useState("")
-    const [numQuestions, setNumQuestions] = useState(5)
-    const [purpose, setPurpose] = useState("")
+  const [loading, setLoading] = useState(false);
 
-    // Quiz State
-    const [quizStarted, setQuizStarted] = useState(false)
-    const [currentIndex, setCurrentIndex] = useState(0)
+  // quiz data from API
+  const [quizData, setQuizData] = useState(null);
 
-    const [userAnswer, setUserAnswer] = useState("")
-    const [submittedAnswers, setSubmittedAnswers] = useState([])
+  // interactive states
+  const [currentQuestion, setCurrentQuestion] = useState(0);
+  const [selectedOption, setSelectedOption] = useState("");
+  const [showAnswer, setShowAnswer] = useState(false);
 
-    // Temporary Dummy Questions
-    const questions = Array.from({ length: numQuestions }).map((_, i) => ({
-        id: i + 1,
-        question: `(${topic}) Question ${i + 1}: Explain a key concept about ${topic}.`,
-    }))
+  // Handle Quiz Generation
+  async function handleQuizGeneration(e) {
+    e.preventDefault();
 
-    // Start Quiz
-    const handleStartQuiz = (e) => {
-        e.preventDefault()
-
-        if (!topic || !purpose) return
-
-        setQuizStarted(true)
-        setCurrentIndex(0)
-        setSubmittedAnswers([])
+    if (!topic || !purpose || !numQuestions) {
+      alert("All fields are required!");
+      return;
     }
 
-    // Submit Answer → Next Question
-    const handleSubmitAnswer = () => {
-        if (!userAnswer.trim()) return
+    try {
+      setLoading(true);
 
-        // Save answer
-        setSubmittedAnswers((prev) => [
-            ...prev,
-            {
-                question: questions[currentIndex].question,
-                answer: userAnswer,
-            },
-        ])
+      const res = await api.post("/ai-services/create-quiz", {
+        topic,
+        purpose,
+        num_questions: numQuestions,
+      });
+      // API response format:
+      // res.data.quiz.quiz.questions
+      setQuizData(res.data.quiz.quiz);
 
-        // Clear input
-        setUserAnswer("")
-
-        // Move next
-        setCurrentIndex((prev) => prev + 1)
+      // Reset interactive state
+      setCurrentQuestion(0);
+      setSelectedOption("");
+      setShowAnswer(false);
+    } catch (error) {
+      console.log("Quiz generation error:", error);
+      alert("Failed to generate quiz!");
+    } finally {
+      setLoading(false);
     }
+  }
 
-    // Finished Quiz
-    const quizFinished = currentIndex >= questions.length
+  // Handle Option Click
+  function handleOptionSelect(option) {
+    setSelectedOption(option);
+    setShowAnswer(true);
+  }
 
-    return (
-        <div className="space-y-6">
+  // Next Question
+  function handleNext() {
+    setSelectedOption("");
+    setShowAnswer(false);
 
-            {/* Page Title */}
-            <div>
-                <h2 className="text-xl font-semibold text-slate-900">
-                    Interactive Quiz Builder 🤖
-                </h2>
-                <p className="text-sm text-slate-600">
-                    Enter a topic and start answering questions in real-time.
-                </p>
-            </div>
+    if (currentQuestion < quizData.questions.length - 1) {
+      setCurrentQuestion(currentQuestion + 1);
+    }
+  }
 
-            {/*QUIZ SETUP FORM*/}
-            {!quizStarted && (
-                <form
-                    onSubmit={handleStartQuiz}
-                    className="app-card"
+  return (
+    <div style={styles.container}>
+      <h1 style={styles.heading}>🎯 Interactive Quiz Generator</h1>
+
+      {/* FORM */}
+      {!quizData && (
+        <form style={styles.form} onSubmit={handleQuizGeneration}>
+          <input
+            type="text"
+            placeholder="Enter Topic (e.g., Angular)"
+            value={topic}
+            onChange={(e) => setTopic(e.target.value)}
+            style={styles.input}
+          />
+
+          <input
+            type="text"
+            placeholder="Enter Purpose (Interview Prep)"
+            value={purpose}
+            onChange={(e) => setPurpose(e.target.value)}
+            style={styles.input}
+          />
+
+          <input
+            type="number"
+            placeholder="Number of Questions"
+            value={numQuestions}
+            onChange={(e) => setNumQuestions(e.target.value)}
+            style={styles.input}
+          />
+
+          <button style={styles.button} type="submit">
+            {loading ? "Generating..." : "Generate Quiz 🚀"}
+          </button>
+        </form>
+      )}
+
+      {/* QUIZ UI */}
+      {quizData && (
+        <div style={styles.quizBox}>
+          <h2>
+            📌 Topic: {quizData.topic} | Purpose: {quizData.purpose}
+          </h2>
+
+          {/* Current Question */}
+          <h3 style={styles.question}>
+            Q{currentQuestion + 1}.{" "}
+            {quizData.questions[currentQuestion].question}
+          </h3>
+
+          {/* Options */}
+          <div style={styles.options}>
+            {["A", "B", "C", "D"].map((key) => {
+              const optionText =
+                quizData.questions[currentQuestion][`option${key}`];
+
+              return (
+                <button
+                  key={key}
+                  style={{
+                    ...styles.optionBtn,
+                    backgroundColor:
+                      selectedOption === key ? "#ffd54f" : "#f5f5f5",
+                  }}
+                  onClick={() => handleOptionSelect(key)}
+                  disabled={showAnswer}
                 >
-                    <div className="app-card-body space-y-4">
+                  {key}. {optionText}
+                </button>
+              );
+            })}
+          </div>
 
-                        {/* Topic */}
-                        <div>
-                            <label className="text-sm font-medium text-slate-700">
-                                Topic
-                            </label>
-                            <input
-                                type="text"
-                                value={topic}
-                                onChange={(e) => setTopic(e.target.value)}
-                                placeholder="e.g. JavaScript Closures"
-                                className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-600"
-                            />
-                        </div>
+          {/* Answer Feedback */}
+          {showAnswer && (
+            <div style={styles.answerBox}>
+              <p>
+                ✅ Correct Answer:{" "}
+                <b>{quizData.questions[currentQuestion].answer}</b>
+              </p>
 
-                        {/* Number */}
-                        <div>
-                            <label className="text-sm font-medium text-slate-700">
-                                Number of Questions
-                            </label>
-                            <input
-                                type="number"
-                                min="1"
-                                max="20"
-                                value={numQuestions}
-                                onChange={(e) => setNumQuestions(Number(e.target.value))}
-                                className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-600"
-                            />
-                        </div>
+              <p style={{ marginTop: "10px" }}>
+                📖 Explanation:{" "}
+                {quizData.questions[currentQuestion].explanation}
+              </p>
+            </div>
+          )}
 
-                        {/* Purpose */}
-                        <div>
-                            <label className="text-sm font-medium text-slate-700">
-                                Purpose
-                            </label>
-                            <input
-                                type="text"
-                                value={purpose}
-                                onChange={(e) => setPurpose(e.target.value)}
-                                placeholder="e.g. Interview Preparation"
-                                className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-600"
-                            />
-                        </div>
+          {/* Next Button */}
+          {showAnswer && currentQuestion < quizData.questions.length - 1 && (
+            <button style={styles.nextBtn} onClick={handleNext}>
+              Next Question ➡️
+            </button>
+          )}
 
-                        {/* Start Button */}
-                        <button
-                            type="submit"
-                            className="w-full rounded-lg bg-blue-700 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-800"
-                        >
-                            Start Quiz
-                        </button>
-                    </div>
-                </form>
-            )}
+          {/* Finished */}
+          {showAnswer && currentQuestion === quizData.questions.length - 1 && (
+            <h2 style={{ marginTop: "20px" }}>🎉 Quiz Completed! Great job!</h2>
+          )}
 
-            {/* QUIZ CARDS */}
-            {quizStarted && !quizFinished && (
-                <div className="app-card">
-                    <div className="app-card-body space-y-4">
-
-                        {/* Progress */}
-                        <p className="text-sm text-slate-500">
-                            Question {currentIndex + 1} of {questions.length}
-                        </p>
-
-                        {/* Question */}
-                        <h3 className="text-lg font-semibold text-slate-900">
-                            {questions[currentIndex].question}
-                        </h3>
-
-                        {/* Answer Input */}
-                        <textarea
-                            value={userAnswer}
-                            onChange={(e) => setUserAnswer(e.target.value)}
-                            placeholder="Type your answer here..."
-                            rows={4}
-                            className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-600"
-                        />
-
-                        {/* Submit Button */}
-                        <button
-                            onClick={handleSubmitAnswer}
-                            className="rounded-lg bg-green-600 px-4 py-2 text-sm font-semibold text-white hover:bg-green-700"
-                        >
-                            Submit Answer →
-                        </button>
-                    </div>
-                </div>
-            )}
-
-            {/*QUIZ COMPLETED*/}
-            {quizFinished && (
-                <div className="app-card">
-                    <div className="app-card-body space-y-3">
-
-                        <h3 className="text-lg font-semibold text-slate-900">
-                            🎉 Quiz Completed!
-                        </h3>
-
-                        <p className="text-sm text-slate-600">
-                            You answered all questions on <b>{topic}</b>.
-                        </p>
-
-                        {/* Answer Review */}
-                        <div className="space-y-3">
-                            {submittedAnswers.map((item, i) => (
-                                <div
-                                    key={i}
-                                    className="rounded-lg border border-slate-200 p-3"
-                                >
-                                    <p className="text-sm font-medium text-slate-800">
-                                        Q{i + 1}: {item.question}
-                                    </p>
-                                    <p className="mt-1 text-sm text-slate-600">
-                                        Answer: {item.answer}
-                                    </p>
-                                </div>
-                            ))}
-                        </div>
-
-                        {/* Restart */}
-                        <button
-                            onClick={() => setQuizStarted(false)}
-                            className="mt-3 rounded-lg bg-blue-700 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-800"
-                        >
-                            Restart Quiz
-                        </button>
-                    </div>
-                </div>
-            )}
+          {/* Restart */}
+          <button style={styles.restartBtn} onClick={() => setQuizData(null)}>
+            🔄 Generate Another Quiz
+          </button>
         </div>
-    )
+      )}
+    </div>
+  );
 }
+
+/* SIMPLE INLINE STYLES */
+const styles = {
+  container: {
+    width: "80%",
+    margin: "auto",
+    textAlign: "center",
+    fontFamily: "Arial",
+  },
+  heading: {
+    marginBottom: "20px",
+  },
+  form: {
+    display: "flex",
+    flexDirection: "column",
+    gap: "15px",
+    width: "400px",
+    margin: "auto",
+  },
+  input: {
+    padding: "10px",
+    fontSize: "16px",
+  },
+  button: {
+    padding: "12px",
+    background: "black",
+    color: "white",
+    cursor: "pointer",
+    border: "none",
+  },
+  quizBox: {
+    marginTop: "30px",
+    padding: "20px",
+    border: "2px solid #ddd",
+    borderRadius: "10px",
+  },
+  question: {
+    marginTop: "20px",
+  },
+  options: {
+    display: "flex",
+    flexDirection: "column",
+    gap: "10px",
+    marginTop: "15px",
+  },
+  optionBtn: {
+    padding: "10px",
+    cursor: "pointer",
+    borderRadius: "8px",
+    border: "1px solid gray",
+    fontSize: "15px",
+  },
+  answerBox: {
+    marginTop: "20px",
+    padding: "15px",
+    background: "#e8f5e9",
+    borderRadius: "8px",
+  },
+  nextBtn: {
+    marginTop: "15px",
+    padding: "10px 15px",
+    cursor: "pointer",
+    background: "#1976d2",
+    color: "white",
+    border: "none",
+    borderRadius: "6px",
+  },
+  restartBtn: {
+    marginTop: "20px",
+    padding: "10px 15px",
+    cursor: "pointer",
+    background: "darkred",
+    color: "white",
+    border: "none",
+    borderRadius: "6px",
+  },
+};
