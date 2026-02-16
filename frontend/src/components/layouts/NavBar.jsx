@@ -23,7 +23,7 @@ function NavBar() {
                 <div className="flex flex-wrap items-center justify-end gap-x-6 gap-y-2 text-sm">
                     <NavLink to="/" className={linkClass}>Home</NavLink>
                     <NavLink to="/roadmap-build" className={linkClass}>Roadmap</NavLink>
-                    <NavLink to="/quiz-build" className={linkClass}>Quiz</NavLink>
+                    <NavLink to="/quiz" className={linkClass}>Quiz</NavLink>
                     <NavLink to="/dashboard" className={linkClass}>Dashboard</NavLink>
                     {isLoggedIn ? (
                             <NavLink to="/profile" className={linkClass}>Profile</NavLink>

@@ -60,7 +60,6 @@ function VariableRoadmap() {
 
             console.log("API Response:", response.data);
 
-            // ✅ Save roadmap response
             setRoadmap(response.data.roadmap);
 
         } catch (err) {
