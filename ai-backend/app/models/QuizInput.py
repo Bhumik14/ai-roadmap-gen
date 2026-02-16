@@ -4,5 +4,5 @@ from typing import List
 class QuizInput(BaseModel):
     topic: str
     purpose: str
-    previous_q_summary: List[str]
+    num_questions: int
 

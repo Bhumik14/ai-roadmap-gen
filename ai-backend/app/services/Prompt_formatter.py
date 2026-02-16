@@ -4,6 +4,6 @@ async def format_quiz_prompt(body):
     prompt = quiz_prompt.format_messages(
         purpose=body['purpose'],
         topic=body['topic'],
-        previous_q_summary=body['previous_summary']
+        num_questions=body['num_questions']
     )
     return prompt

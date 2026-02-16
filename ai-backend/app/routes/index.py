@@ -68,11 +68,11 @@ async def create_quiz(request: QuizInput):
     body = {
         "topic": request.topic,
         "purpose": request.purpose,
-        "previous_summary": request.previous_q_summary
+        "num_questions": request.num_questions
     }
     prompt = await format_quiz_prompt(body)
-    next_question = await generate_next_question(prompt)
+    quiz = await generate_next_question(prompt)
     return {
         "message": "Question get generated Successfully",
-        "problem": next_question
+        "quiz": quiz
     }
