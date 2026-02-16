@@ -1,5 +1,6 @@
 import { Router } from "express";
-import { roadmapCreationController, quizCreationController, roadmapCreationResumeController } from "../controllers/ai.controller.js";
+import { roadmapCreationController, roadmapCreationResumeController } from "../controllers/roadmap.controller.js";
+import { quizCreationController } from "../controllers/quiz.controller.js"
 import { upload } from "../middleware/upload.middleware.js";
 const router = Router();
 

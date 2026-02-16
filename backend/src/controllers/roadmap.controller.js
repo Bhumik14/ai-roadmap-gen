@@ -30,7 +30,7 @@ export async function roadmapCreationController (req, res) {
 
         const roadmap = await fastapiClient.post("/roadmap/create-roadmap", prompt);
         console.log(roadmap);
-        
+
          res.status(201).json({
             message: "Roadmap Created Sucessfully",
              roadmap: roadmap.data
@@ -71,7 +71,7 @@ export async function roadmapCreationResumeController (req, res) {
             "system": roadmap_prompt.formatted_message[0].content,
             "human": roadmap_prompt.formatted_message[1].content
         }
-        
+
         const roadmap = await fastapiClient.post("/roadmap/create-roadmap", prompt);
         console.log(roadmap.data.roadmap)
         console.log("Roadmap Creation Success")
@@ -88,17 +88,3 @@ export async function roadmapCreationResumeController (req, res) {
     }
 }
 
-export function quizCreationController (req, res) {
-    try{
-
-        res.status(201).json({
-            message: "Quiz Creation Controller"
-        })
-    }
-    catch(err){
-        console.error("Error in Quiz Creation: ", err);
-        res.status(500).json({
-            error: "Internal Server Error"
-        })
-    }
-}
