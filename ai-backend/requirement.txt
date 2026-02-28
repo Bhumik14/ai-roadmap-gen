@@ -1,2 +1,4 @@
-fastapi[standard] == 0.0.16
-dotenv == 0.9.9
+fastapi[standard]=0.133.0
+dotenv=0.9.9
+langchain=1.2.10
+langchain_ollama=1.0.1
